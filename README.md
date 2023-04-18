@@ -1,2 +1,2 @@
 # my-ci-cd-project 
-My Project
+My CI-CD Project
