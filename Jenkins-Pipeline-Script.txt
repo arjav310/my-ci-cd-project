@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+
+    stages {
+        
+        stage('Verify Tooling'){
+            steps{
+                sh '''
+                    docker version
+                    docker info
+                    docker-compose version
+                '''
+            }
+        }
+        
+        stage('Fetch Code') {
+            steps {
+                // Get some code from a GitHub repository
+                git branch: 'main', url : 'https://github.com/arjav310/my-ci-cd-project/'
+                
+                script {
+                    env.GIT_COMMIT_MSG = sh (script: 'git log -1 --pretty=%B ${GIT_COMMIT}', returnStdout: true).trim()
+                }
+                slackSend botUser: false, 
+                    channel: 'app-build-notifications', 
+                    color: '#00ff00', 
+                    message: 'To-Do App \nBuild Started', 
+                    tokenCredentialId: '6020d4c3-54f3-4331-857a-06091797c502'
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                sh 'docker-compose down'
+                sh 'docker-compose build'
+            }
+        }
+        
+        stage('Run Tests'){
+            steps {
+                slackSend botUser: false, 
+                    channel: 'app-build-notifications', 
+                    color: '#00ff00', 
+                    message: 'To-Do App \nTesting in progress', 
+                    tokenCredentialId: '6020d4c3-54f3-4331-857a-06091797c502'
+                sh 'docker-compose run test'
+            }
+        }
+        
+        stage('Start Containers'){
+            steps {
+                sh 'docker-compose up -d'
+                sh 'docker-compose ps'
+            }
+        }
+        
+        stage('Notify & Cleanup') {
+            steps{
+                slackSend botUser: false, 
+                      channel: 'app-build-notifications', 
+                      color: '#00ff00', 
+                      message: 'To-Do App \nBuild Completed! \nAccess URL : http://20.220.56.72:3000/ \n\n Git info : \n' + env.GIT_COMMIT_MSG, 
+                      tokenCredentialId: '6020d4c3-54f3-4331-857a-06091797c502'
+            }
+        }
+    }
+}
