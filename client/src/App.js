@@ -31,7 +31,7 @@ const App = () => {
     <MainContext.Provider value={states}>
       <div className="app-container">
         <Semantic.Segment className="list-container">
-          <Title text="Todo" />
+          <Title text="Todo - New" />
           <Form />
           <Semantic.Divider />
           <div className="app-item-list">
