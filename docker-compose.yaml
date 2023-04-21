@@ -40,7 +40,12 @@ services:
       - 27017:27017
     volumes:
       - mongo-data:/data/mongo
-
+  test:
+    build:
+      context: ./client
+    environment:
+      - CI=true
+    command: npm test
 volumes:
   mongo-data:
     driver: local
